@@ -4,7 +4,7 @@
 
 - 别名：AI 搜索实验记录器
 - 类型：软件工具实验，不是虚构公司或线下门店。
-- 官网：https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/
+- 官网：https://nineting19.github.io/
 - 当前版本：1.0
 - 需要少量手动验证 AI 搜索结果、保存原始证据的创作者与小团队。
 - 需要自动批量代问、多人实时协作、跨设备自动同步或效果保证的人。

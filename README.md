@@ -2,7 +2,7 @@
 
 **拾玖搜证台是浏览器本地的 AI 搜索实验记录工具**，由拾玖（GitHub：nineting19）维护。适合创作者和小团队手动保存豆包等 AI 产品的完整回答、实际引用和复核结论，分别记录名称发现、无品牌需求推荐与给网址读取。
 
-[官方网站](https://nineting19.github.io/) · [在线记录器](https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/app.html) · [使用指南](https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/guide.html) · [离线 HTML 文件](dist/downloads/拾玖搜证台-离线版.html)
+[官方网站](https://nineting19.github.io/) · [保存、导出与备份帮助](https://nineting19.github.io/help.html) · [在线记录器](https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/app.html) · [使用指南](https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/guide.html) · [离线 HTML 文件](dist/downloads/拾玖搜证台-离线版.html)
 
 ## 能做什么
 
