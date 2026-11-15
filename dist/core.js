@@ -1,4 +1,4 @@
-/* 拾玖搜证台 1.0 · MIT. Independent implementation; see credits.html. */
+/* 拾玖搜证台 1.0.1 · MIT. Independent implementation; see credits.html. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.SearchNotebook = factory();
@@ -6,6 +6,8 @@
   'use strict';
   const kinds = { name: '名称发现', scene: '需求推荐', url: '网址读取', exclude: '不适用排除' };
   const statuses = { complete: '完整', refusal: '拒答', technical: '技术失败', incomplete: '不完整' };
+  const limits = Object.freeze({maxRecords:2000,maxBytes:3000000});
+  function byteLength(text) { return new TextEncoder().encode(text).byteLength; }
   const headers = ['run_id','问题id','轮次','平台','入口','日期','联网搜索','登录','地区','是否提到我们','位置','描述是否正确','错误内容','引用来源','备注','批次','问题集版本','事实卡版本','回答状态','排除是否正确','原文路径','来源状态','是否推荐我们','推荐了谁'];
   function uid() { return globalThis.crypto && globalThis.crypto.randomUUID ? globalThis.crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); }
   function url(s) { try { const u = new URL(s); return /^https?:$/.test(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; } }
@@ -69,14 +71,34 @@
     })].map(row=>row.map(csvCell).join(',')).join('\r\n');
   }
   function exportJSON(records) { return JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),records},null,2); }
-  function parseImport(text, existing=[]) {
-    if(text.length>3000000)throw Error('文件不能超过 3 MB');
+  function prepareStorage(records) {
+    if(records.length>limits.maxRecords)throw Error('合并或保存后不能超过 2000 条，请先备份并分批管理');
+    const text=exportJSON(records);
+    if(byteLength(text)>limits.maxBytes)throw Error('合并或保存后的完整 JSON 超过 3,000,000 字节；原有记录和输入未改动。请先分批备份，再分批管理');
+    return text;
+  }
+  function decodeRecords(text, existing, enforceSize) {
+    if(enforceSize&&byteLength(text)>limits.maxBytes)throw Error('文件不能超过 3,000,000 字节（UTF-8）');
     let data;try{data=JSON.parse(text);}catch{throw Error('JSON 格式错误');}
     if(!data||data.schemaVersion!==1||!Array.isArray(data.records)||data.records.length>2000)throw Error('需要 schemaVersion=1 的记录文件，最多 2000 条');
     const seen=new Set(existing.map(r=>r.id));const records=[];let duplicates=0;
     for(const item of data.records) {const r=validate(item);if(seen.has(r.id)){duplicates++;continue;}seen.add(r.id);records.push(r);}
-    if(existing.length+records.length>2000)throw Error('合并后超过 2000 条，请先导出备份');
+    if(existing.length+records.length>limits.maxRecords)throw Error('合并后超过 2000 条，请先导出备份');
+    if(enforceSize)prepareStorage([...existing,...records]);
     return {records,duplicates};
+  }
+  function parseImport(text, existing=[]) { return decodeRecords(text,existing,true); }
+  // Older local data may exceed the new write limit. Read and export it without rewriting it.
+  function parseStored(text) { return decodeRecords(text,[],false); }
+  function splitJSON(records) {
+    const parts=[];let chunk=[],bytes=byteLength(exportJSON([]))+8;
+    for(const item of records) {
+      const r=validate(item),size=byteLength(JSON.stringify(r,null,2).replace(/^/gm,'    '))+2;
+      if(chunk.length&&(bytes+size>limits.maxBytes||chunk.length>=limits.maxRecords)) {parts.push(prepareStorage(chunk));chunk=[];bytes=byteLength(exportJSON([]))+8;}
+      chunk.push(r);bytes+=size;
+    }
+    if(chunk.length||!parts.length)parts.push(prepareStorage(chunk));
+    return parts;
   }
   function report(records) {
     const out=['# 拾玖搜证台 · 采样报告','','统计为人工复核标记，不代表平台官方测评。网址读取不计入名称发现或需求推荐。原始 JSON 才是完整可回导备份。',''];
@@ -89,5 +111,5 @@
     for(const r of records)out.push('## '+r.id,`类型：${kinds[r.kind]} / ${r.simulated?'模拟':'真实'} / ${statuses[r.status]}`,`问句：${r.question}`,`结果：${outcome(r).success?'人工判定达标':'未达标或待核对'}`,`核对事实：\n${r.factNotes}`,`来源：\n${r.sources}`,'','回答原文：','',r.answer,'');
     return out.join('\n');
   }
-  return {kinds,statuses,headers,uid,url,urls,validate,protocol,outcome,summarize,csv,exportJSON,parseImport,report};
+  return {kinds,statuses,headers,limits,byteLength,uid,url,urls,validate,protocol,outcome,summarize,csv,exportJSON,prepareStorage,parseImport,parseStored,splitJSON,report};
 });

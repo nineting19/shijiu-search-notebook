@@ -3,7 +3,7 @@
 <div class="app-head"><div><p class="eyebrow">SEARCH NOTEBOOK / 01</p><h1>先保存原文，再谈命中。</h1><p class="muted">名称发现和需求推荐分别统计；网址读取单独诊断。</p></div><button type="button" class="secondary" id="toggle-practice">试用模拟练习</button></div><div id="mode-banner" class="callout"><strong id="mode-label">离线记录器 · 真实采样</strong><br><span class="tiny">手动填写，不自动访问豆包。换浏览器、清理缓存会影响记录；请及时导出 JSON。</span></div><p id="storage-warning" role="alert" class="statusline"></p>
 <div class="toolbar"><label for="batch-filter">查看批次<select id="batch-filter"><option value="all">全部批次</option></select></label><span class="tiny">不同平台、入口、模型模式、联网、登录及地区单独分组。</span></div><div id="metrics" aria-live="polite"></div>
 <div class="app-grid"><section class="panel"><h2 style="font-size:25px">新增一条记录</h2><form id="record-form"><div class="step">01 · 测试对象与问句</div><div class="grid2"><label class="field" for="brand">被测名称<input id="brand" type="text" value="拾玖搜证台" required></label><label class="field" for="batch">批次名称<input id="batch" type="text" value="" required></label></div><label class="field" for="question-id">构造问题集（q1）<select id="question-id"></select></label><p class="tiny" id="question-hint"></p><label class="field" for="kind">测试路径<select id="kind"><option value="name">名称发现</option><option value="scene">需求推荐</option><option value="url">网址读取</option><option value="exclude">不适用排除</option></select></label><label class="field" for="question">实际提问内容<textarea id="question" rows="4" required></textarea><small>可编辑。需求测试不得包含名称、别名、作者或网址；给过线索的记录请改为诊断。</small></label><button type="button" class="secondary" id="copy">复制问句</button><div class="step">02 · 实际测试环境</div><div class="grid2"><label class="field" for="platform">平台<input id="platform" type="text" value="豆包" required></label><label class="field" for="entry">入口<select id="entry"><option value="网页">网页</option><option value="App">App</option><option value="API">API（不代表 App）</option></select></label><label class="field" for="mode">模型 / 产品模式<input id="mode" type="text" value="未知" ></label><label class="field" for="network">联网搜索<select id="network"><option value="未知">未知</option><option value="已开启">已开启</option><option value="关闭">关闭</option></select></label><label class="field" for="login">登录状态<select id="login"><option value="未知">未知</option><option value="已登录">已登录</option><option value="未登录">未登录</option></select></label><label class="field" for="region">测试地区<input id="region" type="text" value="未知" ></label></div><div class="checks"><label><input type="checkbox" id="fresh">我在全新对话中提问，之前没有给网址、相关页面或答案线索</label></div><div class="step">03 · 原文与人工核验</div><label class="field" for="status">回答状态<select id="status"><option value="complete">完整回答</option><option value="refusal">明确拒答</option><option value="technical">技术失败</option><option value="incomplete">未完成</option></select></label><label class="field" for="answer">完整回答原文<textarea id="answer" class="long" required placeholder="粘贴原文。不要把截图 OCR 摘要或我们的期望答案当成模型原文。"></textarea></label><label class="field" for="sources">模型实际给出的来源链接<textarea id="sources" placeholder="每行一个完整 https:// 地址"></textarea><small>不要将自己补找的网页冒充模型引用。请逐个打开核对。</small></label><label class="field" for="fact-notes">核对到的具体事实<textarea id="fact-notes" placeholder="至少两行，各写一条问题里没给出的具体事实与核对依据"></textarea></label><div class="checks"><label><input type="checkbox" id="mentioned">回答实际提到了被测对象</label><label><input type="checkbox" id="identity">名称和主体对应正确，没有同名混淆</label><label><input type="checkbox" id="facts">回答中的具体事实经人工核对正确</label><label><input type="checkbox" id="source-verified">至少一个模型引用链接能打开，且正文支持这些事实</label><label><input type="checkbox" id="recommended">回答确实将它推荐给该需求，而不只是提及</label></div><label class="field" for="notes">偏差 / 待查事项<textarea id="notes" placeholder="记录错误、未核实信息、其他被推荐对象、截图文件名等"></textarea></label><button id="save" class="primary" type="submit">保存这条证据</button><p class="tiny" style="margin-top:12px">自动计算只汇总你的人工标记，不会替你读懂或验证回答。</p></form></section>
-<aside class="panel"><h2 style="font-size:25px">证据簿 <span class="badge" id="count">0 条</span></h2><p class="tiny">导出当前筛选范围。JSON 是完整备份；CSV 与报告用于复核。模拟记录只能导入练习区。</p><div class="tools"><button id="export-json" type="button">导出 JSON</button><button id="export-csv" type="button">导出 CSV</button><button id="export-report" type="button">导出报告</button><button id="export-bundle" type="button">GEO 医生文件清单</button><label class="file-label">导入 JSON<input type="file" id="import-json" accept=".json,application/json"></label></div><div id="import-box" class="notice hidden"><p id="import-info"></p><button type="button" id="confirm-import" class="secondary">确认合并</button> <button type="button" id="cancel-import" class="secondary">取消</button></div><div id="record-list"></div><div class="callout" style="margin-top:24px"><strong>判定提醒</strong><p class="tiny">给网址读取成功不算独立发现。名称发现需原文、主体、至少两条事实与支持来源；需求推荐还需推荐行为。空白、技术失败和不符合提问条件的记录保留，但不进入有效样本分母。</p><a class="tiny" href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/guide.html">完整判定和拆包说明 →</a></div></aside></div><div id="toast" class="toast hidden" role="status" aria-live="polite"></div></div></main><footer class="footer"><div class="wrap"><span>拾玖搜证台 1.0 · AI 搜索实验记录器 · 2026-11-03</span><span><a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/evidence.html">核验状态</a>　<a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/credits.html">来源与许可</a>　<a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/privacy.html">数据说明</a></span></div></footer><script>/* 拾玖搜证台 1.0 · MIT. Independent implementation; see credits.html. */
+<aside class="panel"><h2 style="font-size:25px">证据簿 <span class="badge" id="count">0 条</span></h2><p class="tiny">导出当前筛选范围。JSON 保存完整文字记录；总大小超限的旧记录请用分批备份。CSV 与报告用于复核。模拟记录只能导入练习区。</p><div class="tools"><button id="export-json" type="button">导出 JSON</button><button id="export-parts" type="button" class="secondary">分批备份 JSON</button><button id="export-csv" type="button">导出 CSV</button><button id="export-report" type="button">导出报告</button><button id="export-bundle" type="button">GEO 医生文件清单</button><label class="file-label">导入 JSON<input type="file" id="import-json" accept=".json,application/json"></label></div><div id="split-backup-box" class="notice hidden" aria-live="polite"></div><div id="import-box" class="notice hidden"><p id="import-info"></p><button type="button" id="confirm-import" class="secondary">确认合并</button> <button type="button" id="cancel-import" class="secondary">取消</button></div><div id="record-list"></div><div class="callout" style="margin-top:24px"><strong>判定提醒</strong><p class="tiny">给网址读取成功不算独立发现。名称发现需原文、主体、至少两条事实与支持来源；需求推荐还需推荐行为。空白、技术失败和不符合提问条件的记录保留，但不进入有效样本分母。</p><a class="tiny" href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/guide.html">完整判定和拆包说明 →</a></div></aside></div><div id="toast" class="toast hidden" role="status" aria-live="polite"></div></div></main><footer class="footer"><div class="wrap"><span>拾玖搜证台 1.0.1 · AI 搜索实验记录器 · 2026-11-03</span><span><a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/evidence.html">核验状态</a>　<a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/credits.html">来源与许可</a>　<a href="https://nineting19.github.io/zhengzhou-geo-demo-20261102/search-notebook/privacy.html">数据说明</a></span></div></footer><script>/* 拾玖搜证台 1.0.1 · MIT. Independent implementation; see credits.html. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.SearchNotebook = factory();
@@ -11,6 +11,8 @@
   'use strict';
   const kinds = { name: '名称发现', scene: '需求推荐', url: '网址读取', exclude: '不适用排除' };
   const statuses = { complete: '完整', refusal: '拒答', technical: '技术失败', incomplete: '不完整' };
+  const limits = Object.freeze({maxRecords:2000,maxBytes:3000000});
+  function byteLength(text) { return new TextEncoder().encode(text).byteLength; }
   const headers = ['run_id','问题id','轮次','平台','入口','日期','联网搜索','登录','地区','是否提到我们','位置','描述是否正确','错误内容','引用来源','备注','批次','问题集版本','事实卡版本','回答状态','排除是否正确','原文路径','来源状态','是否推荐我们','推荐了谁'];
   function uid() { return globalThis.crypto && globalThis.crypto.randomUUID ? globalThis.crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); }
   function url(s) { try { const u = new URL(s); return /^https?:$/.test(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; } }
@@ -74,14 +76,34 @@
     })].map(row=>row.map(csvCell).join(',')).join('\r\n');
   }
   function exportJSON(records) { return JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),records},null,2); }
-  function parseImport(text, existing=[]) {
-    if(text.length>3000000)throw Error('文件不能超过 3 MB');
+  function prepareStorage(records) {
+    if(records.length>limits.maxRecords)throw Error('合并或保存后不能超过 2000 条，请先备份并分批管理');
+    const text=exportJSON(records);
+    if(byteLength(text)>limits.maxBytes)throw Error('合并或保存后的完整 JSON 超过 3,000,000 字节；原有记录和输入未改动。请先分批备份，再分批管理');
+    return text;
+  }
+  function decodeRecords(text, existing, enforceSize) {
+    if(enforceSize&&byteLength(text)>limits.maxBytes)throw Error('文件不能超过 3,000,000 字节（UTF-8）');
     let data;try{data=JSON.parse(text);}catch{throw Error('JSON 格式错误');}
     if(!data||data.schemaVersion!==1||!Array.isArray(data.records)||data.records.length>2000)throw Error('需要 schemaVersion=1 的记录文件，最多 2000 条');
     const seen=new Set(existing.map(r=>r.id));const records=[];let duplicates=0;
     for(const item of data.records) {const r=validate(item);if(seen.has(r.id)){duplicates++;continue;}seen.add(r.id);records.push(r);}
-    if(existing.length+records.length>2000)throw Error('合并后超过 2000 条，请先导出备份');
+    if(existing.length+records.length>limits.maxRecords)throw Error('合并后超过 2000 条，请先导出备份');
+    if(enforceSize)prepareStorage([...existing,...records]);
     return {records,duplicates};
+  }
+  function parseImport(text, existing=[]) { return decodeRecords(text,existing,true); }
+  // Older local data may exceed the new write limit. Read and export it without rewriting it.
+  function parseStored(text) { return decodeRecords(text,[],false); }
+  function splitJSON(records) {
+    const parts=[];let chunk=[],bytes=byteLength(exportJSON([]))+8;
+    for(const item of records) {
+      const r=validate(item),size=byteLength(JSON.stringify(r,null,2).replace(/^/gm,'    '))+2;
+      if(chunk.length&&(bytes+size>limits.maxBytes||chunk.length>=limits.maxRecords)) {parts.push(prepareStorage(chunk));chunk=[];bytes=byteLength(exportJSON([]))+8;}
+      chunk.push(r);bytes+=size;
+    }
+    if(chunk.length||!parts.length)parts.push(prepareStorage(chunk));
+    return parts;
   }
   function report(records) {
     const out=['# 拾玖搜证台 · 采样报告','','统计为人工复核标记，不代表平台官方测评。网址读取不计入名称发现或需求推荐。原始 JSON 才是完整可回导备份。',''];
@@ -94,7 +116,7 @@
     for(const r of records)out.push('## '+r.id,`类型：${kinds[r.kind]} / ${r.simulated?'模拟':'真实'} / ${statuses[r.status]}`,`问句：${r.question}`,`结果：${outcome(r).success?'人工判定达标':'未达标或待核对'}`,`核对事实：\n${r.factNotes}`,`来源：\n${r.sources}`,'','回答原文：','',r.answer,'');
     return out.join('\n');
   }
-  return {kinds,statuses,headers,uid,url,urls,validate,protocol,outcome,summarize,csv,exportJSON,parseImport,report};
+  return {kinds,statuses,headers,limits,byteLength,uid,url,urls,validate,protocol,outcome,summarize,csv,exportJSON,prepareStorage,parseImport,parseStored,splitJSON,report};
 });
 </script><script>window.NOTEBOOK_QUESTIONS = [
   {
@@ -343,13 +365,15 @@
   const C=window.SearchNotebook,$=id=>document.getElementById(id),KEY='shijiu-search-notebook-v1';
   let real=[],practice=[],simulated=false,filter='all',imported=null,storageBroken=false;
   function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.add('hidden'),4500);}
-  function readStorage(){try{const s=localStorage.getItem(KEY);if(s)real=C.parseImport(s).records.filter(r=>!r.simulated);}catch(e){storageBroken=true;$('storage-warning').textContent='本机历史数据未载入：'+e.message+'。已停止覆盖存储；“导出 JSON”可备份原始数据。';$('save').disabled=true;}}
-  function persist(next){if(storageBroken){toast('原始数据异常，已阻止覆盖；请先用“导出 JSON”备份。');return false;}try{localStorage.setItem(KEY,C.exportJSON(next));real=next;return true;}catch{toast('浏览器存储失败。请先导出 JSON 备份，再检查空间或隐私模式。');return false;}}
+  function capacityWarning(){if(!storageBroken)$('storage-warning').textContent=C.byteLength(C.exportJSON(real))>C.limits.maxBytes?'已读取旧版超限记录，未改写原始存储。完整 JSON 超过 3,000,000 字节，不能作为单份导入；请先点击“分批备份 JSON”，逐份下载。新保存或合并需在总大小限制内。':'';}
+  function readStorage(){try{const s=localStorage.getItem(KEY);if(s)real=C.parseStored(s).records.filter(r=>!r.simulated);capacityWarning();}catch(e){storageBroken=true;$('storage-warning').textContent='本机历史数据未载入：'+e.message+'。已停止覆盖存储；“导出 JSON”可备份原始数据。';$('save').disabled=true;}}
+  function persist(next){if(storageBroken){toast('原始数据异常，已阻止覆盖；请先用“导出 JSON”备份。');return false;}let serialized;try{serialized=C.prepareStorage(next);}catch(e){toast(e.message);return false;}try{localStorage.setItem(KEY,serialized);real=next;capacityWarning();return true;}catch{toast('浏览器存储失败。原有记录和输入未改动；请先导出 JSON 备份，再检查空间或隐私模式。');return false;}}
   function current(){return simulated?practice:real;}
   function selected(){return current().filter(r=>filter==='all'||C.summarize([r])[0].key===filter);}
   function text(tag,value,cls){const e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;return e;}
   function updateQuestion(){const q=window.NOTEBOOK_QUESTIONS.find(q=>q.id===$('question-id').value);if(q){$('kind').value=q.kind;$('question').value=q.text.replaceAll('拾玖搜证台',$('brand').value.trim()||'拾玖搜证台');$('question-hint').textContent=q.hint;}}
   function render(){
+    $('split-backup-box').replaceChildren();$('split-backup-box').classList.add('hidden');
     $('mode-label').textContent=simulated?'练习模式 · 所有数据均为模拟':'真实采样 · 数据仅存在当前浏览器';
     $('mode-banner').classList.toggle('warning',simulated);
     $('toggle-practice').textContent=simulated?'返回真实采样':'试用模拟练习';
@@ -371,7 +395,7 @@
   }
   function download(name,content,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
   function collect(){return C.validate({id:C.uid(),questionId:$('question-id').value,kind:$('kind').value,question:$('question').value.trim(),brand:$('brand').value.trim(),batch:$('batch').value.trim(),platform:$('platform').value.trim(),entry:$('entry').value,network:$('network').value,login:$('login').value,region:$('region').value.trim()||'未知',mode:$('mode').value.trim()||'未知',created:new Date().toISOString(),status:$('status').value,answer:$('answer').value,sources:$('sources').value,factNotes:$('fact-notes').value,notes:$('notes').value,fresh:$('fresh').checked,mentioned:$('mentioned').checked,identity:$('identity').checked,facts:$('facts').checked,sourceVerified:$('source-verified').checked,recommended:$('recommended').checked,simulated});}
-  $('record-form').addEventListener('submit',e=>{e.preventDefault();try{const r=collect();if(current().length>=2000)throw Error('当前记录已达 2000 条，请先导出');if(!r.answer.trim())throw Error('请保存回答原文；遇到技术失败时写明具体错误');const next=[...current(),r];if(simulated)practice=next;else if(!persist(next))return;for(const id of ['answer','sources','fact-notes','notes'])$(id).value='';for(const id of ['mentioned','identity','facts','source-verified','recommended'])$(id).checked=false;filter='all';render();toast('记录已保存。'+(C.outcome(r).success?'标记为人工判定达标，请保留原始截图。':'尚未达标或待核对，不会自动当作命中。'));}catch(e){toast(e.message);}});
+  $('record-form').addEventListener('submit',e=>{e.preventDefault();try{const r=collect();if(current().length>=C.limits.maxRecords)throw Error('当前记录已达 2000 条，请先导出');if(!r.answer.trim())throw Error('请保存回答原文；遇到技术失败时写明具体错误');const next=[...current(),r];if(simulated){C.prepareStorage(next);practice=next;}else if(!persist(next))return;for(const id of ['answer','sources','fact-notes','notes'])$(id).value='';for(const id of ['mentioned','identity','facts','source-verified','recommended'])$(id).checked=false;filter='all';render();toast('记录已保存。'+(C.outcome(r).success?'标记为人工判定达标，请保留原始截图。':'尚未达标或待核对，不会自动当作命中。'));}catch(e){toast(e.message);}});
   $('question-id').onchange=updateQuestion;$('brand').onchange=updateQuestion;
   $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('question').value);toast('已复制问句，请在全新对话中提问。');}catch{$('question').focus();$('question').select();toast('当前环境无法自动复制；问句已选中，请手动复制。');}};
   $('batch-filter').onchange=e=>{filter=e.target.value;render();};
@@ -379,8 +403,9 @@
   const toggleMode=$('toggle-practice').onclick;
   $('toggle-practice').onclick=()=>{imported=null;$('import-box').classList.add('hidden');for(const id of ['answer','sources','fact-notes','notes'])$(id).value='';for(const id of ['fresh','mentioned','identity','facts','source-verified','recommended'])$(id).checked=false;toggleMode();};
   for(const [id,extension,type,fn] of [['export-json','json','application/json',C.exportJSON],['export-csv','csv','text/csv;charset=utf-8',C.csv],['export-report','md','text/markdown;charset=utf-8',C.report]])$(id).onclick=()=>{if(id==='export-json'&&storageBroken&&!simulated){try{download('原始存储备份-请检查.json',localStorage.getItem(KEY)||'','application/json');}catch{toast('浏览器无法读取本地存储。');}return;}download(`${simulated?'模拟练习-':'真实采样-'}拾玖搜证台-${new Date().toISOString().slice(0,10)}.${extension}`,fn(selected()),type);};
+  $('export-parts').onclick=()=>{try{if(storageBroken&&!simulated)throw Error('请先用“导出 JSON”保存原始数据；异常数据不能自动拆分');const parts=C.splitJSON(selected()),box=$('split-backup-box');box.replaceChildren(text('p',`当前筛选范围分为 ${parts.length} 份，请逐份点击下载。每份不超过 3,000,000 字节。总量超限时请分别在独立浏览器环境中导入，不能合并回同一记录器。截图文件仍需另存。`));for(const [i,part]of parts.entries()){const button=text('button',`下载第 ${i+1}/${parts.length} 份（${C.byteLength(part)} 字节）`,'secondary');button.type='button';button.onclick=()=>download(`${simulated?'模拟练习-':'真实采样-'}拾玖搜证台-分批-${i+1}-共${parts.length}.json`,part,'application/json');box.append(button);}box.classList.remove('hidden');}catch(e){toast(e.message);}};
   $('export-bundle').onclick=()=>{const rows=selected();const files={'runs.csv':C.csv(rows),'README.md':'# GEO 医生导入包\n\nruns.csv 与原文 JSON 同批次导出。raw/*.md 路径保存在 records.json 的 rawFiles 中。将对应文本另存为文件后可供 GEO 医生读取；此 JSON 不是 runs.csv 替代品。\n','report.md':C.report(rows)};for(const r of rows)files[`raw/${r.id}.md`]=`# ${r.id}\n\n${r.simulated?'【模拟练习】\n':''}问题：${r.question}\n\n${r.answer}\n\n来源：\n${r.sources}\n`;download('GEO医生-文件清单与原文.json',JSON.stringify({schemaVersion:1,records:rows,rawFiles:files},null,2),'application/json');toast('已导出文件清单；具体拆包方法见使用指南。');};
-  $('import-json').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{if(f.size>3000000)throw Error('文件不能超过 3 MB');const result=C.parseImport(await f.text(),current());if(result.records.some(r=>r.simulated!==simulated))throw Error('真实采样与模拟练习不能混合导入，请切换对应模式');imported=result;$('import-info').textContent=`准备合并 ${result.records.length} 条，跳过 ${result.duplicates} 条重复记录。不会覆盖已有记录。`;$('import-box').classList.remove('hidden');}catch(e){toast(e.message);}};
+  $('import-json').onchange=async e=>{imported=null;$('import-box').classList.add('hidden');const f=e.target.files[0];e.target.value='';if(!f)return;try{if(f.size>C.limits.maxBytes)throw Error('文件不能超过 3,000,000 字节（UTF-8）');const result=C.parseImport(await f.text(),current());if(result.records.some(r=>r.simulated!==simulated))throw Error('真实采样与模拟练习不能混合导入，请切换对应模式');imported=result;$('import-info').textContent=`准备合并 ${result.records.length} 条，跳过 ${result.duplicates} 条重复记录。不会覆盖已有记录。`;$('import-box').classList.remove('hidden');}catch(e){toast(e.message);}};
   $('confirm-import').onclick=()=>{if(!imported)return;const next=[...current(),...imported.records];if(simulated)practice=next;else if(!persist(next))return;imported=null;$('import-box').classList.add('hidden');filter='all';render();toast('导入完成');};$('cancel-import').onclick=()=>{imported=null;$('import-box').classList.add('hidden');};
   for(const q of window.NOTEBOOK_QUESTIONS)$('question-id').add(new Option(`${q.id} · ${C.kinds[q.kind]} · ${q.short}`,q.id));
   $('batch').value='基线-'+new Date().toLocaleDateString('sv-SE');readStorage();updateQuestion();render();
